@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Учёт вреда</title>
+
+    <!-- Подключение шрифтов -->
+    <link href="https://fonts.googleapis.com/css2?family=Ruslan+Display&display=swap" rel="stylesheet">
+    <link href=" https://fonts.googleapis.com/css2?family=Jost:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <script src=" https://cdn.jsdelivr.net/npm/chart.js "></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx @0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --primary-color: #4caf50;
+            --primary-hover: #3d8b40;
+            --danger-color: #f44336;
+            --danger-hover: #d32f2f;
+            --secondary-color: #2196f3;
+            --secondary-hover: #1976d2;
+            --border-color: #333;
+            --alcohol-color: #81c784;
+            --tobacco-color: #ef9a9a;
+        }
+        body {
+            font-family: 'Jost', sans-serif; /* Используем Jost для основного текста */
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            position: relative;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        h1 {
+            font-family: 'Ruslan Display', cursive; /* Оставляем Ruslan Display для заголовка */
+            text-align: center;
+            color: var(--text-color);
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: var(--card-color);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 10;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        select, input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: var(--card-color);
+            color: var(--text-color);
+            transition: border-color 0.3s;
+        }
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        button {
+            width: 100%;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+        #add-btn {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        #add-btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+        .chart-container {
+            margin-top: 30px;
+            height: 300px;
+        }
+        .summary {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            gap: 10px;
+        }
+        .summary-item {
+            text-align: center;
+            flex: 1;
+        }
+        .summary-item div:first-child {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+        .summary-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--alcohol-color);
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .controls button {
+            flex: 1;
+        }
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: var(--danger-hover);
+        }
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: var(--secondary-hover);
+        }
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            .chart-container {
+                height: 250px;
+            }
+            .summary {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+            select, input, button {
+                padding: 10px 12px;
+            }
+        }
+        @media (max-width: 480px) {
+            .chart-container {
+                height: 200px;
+            }
+            .summary-value {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Учёт вреда</h1>
+        <div class="form-group">
+            <label for="category">Категория:</label>
+            <select id="category">
+                <option value="alcohol">Алкоголь</option>
+                <option value="tobacco">Табак</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="amount">Сумма (руб):</label>
+            <input type="number" id="amount" min="0" step="1" placeholder="Введите сумму">
+        </div>
+        <div class="form-group">
+            <label for="date">Дата:</label>
+            <input type="date" id="date">
+        </div>
+        <button id="add-btn">Добавить расход</button>
+        <div class="form-group">
+            <label for="period">Период отображения:</label>
+            <select id="period">
+                <option value="day">По дням</option>
+                <option value="week">По неделям</option>
+                <option value="month">По месяцам</option>
+                <option value="year">По годам</option>
+            </select>
+        </div>
+        <div class="chart-container">
+            <canvas id="expenses-chart"></canvas>
+        </div>
+        <div class="summary">
+            <div class="summary-item">
+                <div>Всего за месяц</div>
+                <div class="summary-value" id="month-total">0 ₽</div>
+            </div>
+            <div class="summary-item">
+                <div>Всего за год</div>
+                <div class="summary-value" id="year-total">0 ₽</div>
+            </div>
+        </div>
+        <div class="controls">
+            <button id="export-btn" class="btn-secondary">Выгрузить в Excel</button>
+            <button id="clear-btn" class="btn-danger">Очистить данные</button>
+        </div>
+    </div>
+    <script>
+        // Инициализация хранилища
+        let expenses = JSON.parse(localStorage.getItem('habits_expenses')) || [];
+        // Элементы DOM
+        const categorySelect = document.getElementById('category');
+        const amountInput = document.getElementById('amount');
+        const dateInput = document.getElementById('date');
+        const addBtn = document.getElementById('add-btn');
+        const periodSelect = document.getElementById('period');
+        const monthTotalEl = document.getElementById('month-total');
+        const yearTotalEl = document.getElementById('year-total');
+        const exportBtn = document.getElementById('export-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        // Установка текущей даты по умолчанию
+        dateInput.valueAsDate = new Date();
+        // Инициализация графика с тёмной темой
+        const ctx = document.getElementById('expenses-chart').getContext('2d');
+        Chart.defaults.color = '#a0a0a0';
+        Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+        let chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        label: 'Алкоголь',
+                        backgroundColor: '#81c784',
+                        data: [],
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Табак',
+                        backgroundColor: '#ef9a9a',
+                        data: [],
+                        borderRadius: 4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#e0e0e0'
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Сумма (руб)',
+                            color: '#a0a0a0'
+                        },
+                        ticks: {
+                            color: '#a0a0a0'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Период',
+                            color: '#a0a0a0'
+                        },
+                        ticks: {
+                            color: '#a0a0a0'
+                        }
+                    }
+                }
+            }
+        });
+        // Функция обновления графика и статистики
+        function updateData() {
+            const period = periodSelect.value;
+            const now = new Date();
+            // Фильтрация данных по периоду
+            let labels = [];
+            let alcoholData = [];
+            let tobaccoData = [];
+            if (period === 'day') {
+                // Группировка по дням за последний месяц
+                const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+                labels = Array.from({length: daysInMonth}, (_, i) => i + 1);
+                alcoholData = Array(daysInMonth).fill(0);
+                tobaccoData = Array(daysInMonth).fill(0);
+                expenses.forEach(expense => {
+                    const expenseDate = new Date(expense.date);
+                    if (expenseDate.getMonth() === now.getMonth() && expenseDate.getFullYear() === now.getFullYear()) {
+                        const day = expenseDate.getDate() - 1;
+                        if (expense.category === 'alcohol') {
+                            alcoholData[day] += expense.amount;
+                        } else {
+                            tobaccoData[day] += expense.amount;
+                        }
+                    }
+                });
+            } else if (period === 'week') {
+                // Группировка по неделям за последние 12 недель
+                labels = Array.from({length: 12}, (_, i) => `${12 - i} нед.`);
+                alcoholData = Array(12).fill(0);
+                tobaccoData = Array(12).fill(0);
+                expenses.forEach(expense => {
+                    const expenseDate = new Date(expense.date);
+                    const weekDiff = getWeekNumber(now) - getWeekNumber(expenseDate) + 
+                                    (now.getFullYear() - expenseDate.getFullYear()) * 52;
+                    if (weekDiff >= 0 && weekDiff < 12) {
+                        const weekIndex = 11 - weekDiff;
+                        if (expense.category === 'alcohol') {
+                            alcoholData[weekIndex] += expense.amount;
+                        } else {
+                            tobaccoData[weekIndex] += expense.amount;
+                        }
+                    }
+                });
+            } else if (period === 'month') {
+                // Группировка по месяцам за последний год
+                const monthNames = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
+                labels = monthNames;
+                alcoholData = Array(12).fill(0);
+                tobaccoData = Array(12).fill(0);
+                expenses.forEach(expense => {
+                    const expenseDate = new Date(expense.date);
+                    const monthDiff = (now.getFullYear() - expenseDate.getFullYear()) * 12 + 
+                                     now.getMonth() - expenseDate.getMonth();
+                    if (monthDiff >= 0 && monthDiff < 12) {
+                        const monthIndex = 11 - monthDiff;
+                        if (expense.category === 'alcohol') {
+                            alcoholData[monthIndex] += expense.amount;
+                        } else {
+                            tobaccoData[monthIndex] += expense.amount;
+                        }
+                    }
+                });
+            } else if (period === 'year') {
+                // Группировка по годам за последние 5 лет
+                labels = Array.from({length: 5}, (_, i) => now.getFullYear() - (4 - i));
+                alcoholData = Array(5).fill(0);
+                tobaccoData = Array(5).fill(0);
+                expenses.forEach(expense => {
+                    const expenseDate = new Date(expense.date);
+                    const yearDiff = now.getFullYear() - expenseDate.getFullYear();
+                    if (yearDiff >= 0 && yearDiff < 5) {
+                        const yearIndex = 4 - yearDiff;
+                        if (expense.category === 'alcohol') {
+                            alcoholData[yearIndex] += expense.amount;
+                        } else {
+                            tobaccoData[yearIndex] += expense.amount;
+                        }
+                    }
+                });
+            }
+            // Обновление графика
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = alcoholData;
+            chart.data.datasets[1].data = tobaccoData;
+            chart.update();
+            // Расчет сумм за месяц и год
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+            const monthTotal = expenses
+                .filter(expense => {
+                    const expenseDate = new Date(expense.date);
+                    return expenseDate.getMonth() === currentMonth && 
+                           expenseDate.getFullYear() === currentYear;
+                })
+                .reduce((sum, expense) => sum + expense.amount, 0);
+            const yearTotal = expenses
+                .filter(expense => {
+                    const expenseDate = new Date(expense.date);
+                    return expenseDate.getFullYear() === currentYear;
+                })
+                .reduce((sum, expense) => sum + expense.amount, 0);
+            monthTotalEl.textContent = `${monthTotal.toLocaleString()} ₽`;
+            yearTotalEl.textContent = `${yearTotal.toLocaleString()} ₽`;
+            // Цвет суммы в зависимости от категории
+            const alcoholTotal = expenses
+                .filter(expense => expense.category === 'alcohol')
+                .reduce((sum, expense) => sum + expense.amount, 0);
+            const tobaccoTotal = expenses
+                .filter(expense => expense.category === 'tobacco')
+                .reduce((sum, expense) => sum + expense.amount, 0);
+            if (alcoholTotal > tobaccoTotal) {
+                monthTotalEl.style.color = 'var(--alcohol-color)';
+                yearTotalEl.style.color = 'var(--alcohol-color)';
+            } else if (tobaccoTotal > alcoholTotal) {
+                monthTotalEl.style.color = 'var(--tobacco-color)';
+                yearTotalEl.style.color = 'var(--tobacco-color)';
+            } else {
+                monthTotalEl.style.color = 'var(--text-color)';
+                yearTotalEl.style.color = 'var(--text-color)';
+            }
+        }
+        // Вспомогательная функция для получения номера недели в году
+        function getWeekNumber(date) {
+            const d = new Date(date);
+            d.setHours(0, 0, 0, 0);
+            d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7);
+            const week1 = new Date(d.getFullYear(), 0, 4);
+            return 1 + Math.round(((d - week1) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+        }
+        // Обработчик добавления расхода
+        addBtn.addEventListener('click', () => {
+            const category = categorySelect.value;
+            const amount = parseFloat(amountInput.value);
+            const date = dateInput.value;
+            if (!amount || amount <= 0) {
+                alert('Пожалуйста, введите корректную сумму');
+                return;
+            }
+            if (!date) {
+                alert('Пожалуйста, выберите дату');
+                return;
+            }
+            expenses.push({
+                category,
+                amount,
+                date
+            });
+            localStorage.setItem('habits_expenses', JSON.stringify(expenses));
+            amountInput.value = '';
+            updateData();
+            // Анимация кнопки
+            addBtn.style.transform = 'translateY(0)';
+        });
+        // Обработчик изменения периода
+        periodSelect.addEventListener('change', updateData);
+        // Обработчик экспорта в Excel
+        exportBtn.addEventListener('click', () => {
+            const data = [
+                ['Категория', 'Сумма (руб)', 'Дата'],
+                ...expenses.map(expense => [
+                    expense.category === 'alcohol' ? 'Алкоголь' : 'Табак',
+                    expense.amount,
+                    new Date(expense.date).toLocaleDateString()
+                ])
+            ];
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Расходы');
+            XLSX.writeFile(wb, 'расходы_на_вредные_привычки.xlsx');
+        });
+        // Обработчик очистки данных
+        clearBtn.addEventListener('click', () => {
+            if (confirm('Вы уверены, что хотите удалить все данные? Это действие нельзя отменить.')) {
+                expenses = [];
+                localStorage.removeItem('habits_expenses');
+                updateData();
+            }
+        });
+        // Инициализация данных при загрузке
+        updateData();
+        // Адаптация графика при изменении размера окна
+        window.addEventListener('resize', () => {
+            chart.resize();
+        });
+    </script>
+</body>
+</html>
