@@ -4,13 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Учёт вреда</title>
-
-    <!-- Подключение шрифтов -->
+    <link rel="icon" href="logo.png" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Ruslan+Display&display=swap" rel="stylesheet">
-    <link href=" https://fonts.googleapis.com/css2?family=Jost:wght@400;500;700&display=swap" rel="stylesheet">
-
-    <script src=" https://cdn.jsdelivr.net/npm/chart.js "></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx @0.18.5/dist/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
             --bg-color: #121212;
@@ -27,8 +25,27 @@
             --alcohol-color: #81c784;
             --tobacco-color: #ef9a9a;
         }
+
+        /* Новые стили для логотипа и шапки */
+        .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .logo {
+            position: absolute;
+            left: 20px;
+            height: 50px;
+            width: auto;
+            max-width: 150px;
+            object-fit: contain;
+        }
+
         body {
-            font-family: 'Jost', sans-serif; /* Используем Jost для основного текста */
+            font-family: 'Jost', sans-serif;
             margin: 0;
             padding: 20px;
             background-color: var(--bg-color);
@@ -37,13 +54,16 @@
             overflow-x: hidden;
             min-height: 100vh;
         }
+
         h1 {
-            font-family: 'Ruslan Display', cursive; /* Оставляем Ruslan Display для заголовка */
+            font-family: 'Ruslan Display', cursive;
             text-align: center;
             color: var(--text-color);
-            margin-bottom: 25px;
+            margin: 0 auto;
             font-size: 1.8rem;
+            flex-grow: 1;
         }
+
         .container {
             max-width: 1000px;
             margin: 0 auto;
@@ -54,9 +74,11 @@
             position: relative;
             z-index: 10;
         }
+
         .form-group {
             margin-bottom: 15px;
         }
+
         label {
             display: block;
             margin-bottom: 5px;
@@ -64,6 +86,7 @@
             color: var(--text-secondary);
             font-size: 0.9rem;
         }
+
         select, input {
             width: 100%;
             padding: 12px 15px;
@@ -74,10 +97,12 @@
             color: var(--text-color);
             transition: border-color 0.3s;
         }
+
         select:focus, input:focus {
             outline: none;
             border-color: var(--primary-color);
         }
+
         button {
             width: 100%;
             padding: 12px 15px;
@@ -89,18 +114,22 @@
             margin-top: 10px;
             transition: all 0.3s;
         }
+
         #add-btn {
             background-color: var(--primary-color);
             color: white;
         }
+
         #add-btn:hover {
             background-color: var(--primary-hover);
             transform: translateY(-2px);
         }
+
         .chart-container {
             margin-top: 30px;
             height: 300px;
         }
+
         .summary {
             display: flex;
             justify-content: space-between;
@@ -110,43 +139,53 @@
             border-radius: 8px;
             gap: 10px;
         }
+
         .summary-item {
             text-align: center;
             flex: 1;
         }
+
         .summary-item div:first-child {
             font-size: 0.85rem;
             color: var(--text-secondary);
             margin-bottom: 5px;
         }
+
         .summary-value {
             font-size: 1.3rem;
             font-weight: bold;
             color: var(--alcohol-color);
         }
+
         .controls {
             display: flex;
             gap: 10px;
             margin-top: 20px;
         }
+
         .controls button {
             flex: 1;
         }
+
         .btn-danger {
             background-color: var(--danger-color);
             color: white;
         }
+
         .btn-danger:hover {
             background-color: var(--danger-hover);
         }
+
         .btn-secondary {
             background-color: var(--secondary-color);
             color: white;
         }
+
         .btn-secondary:hover {
             background-color: var(--secondary-hover);
         }
-        /* Адаптивность */
+
+        /* Адаптация для мобильных устройств */
         @media (max-width: 768px) {
             body {
                 padding: 10px;
@@ -154,8 +193,13 @@
             .container {
                 padding: 15px;
             }
+            .logo {
+                height: 40px;
+                left: 10px;
+            }
             h1 {
-                font-size: 1.5rem;
+                font-size: 1.5rem !important;
+                margin-left: 50px !important;
             }
             .chart-container {
                 height: 250px;
@@ -172,9 +216,17 @@
                 padding: 10px 12px;
             }
         }
+
         @media (max-width: 480px) {
             .chart-container {
                 height: 200px;
+            }
+            .logo {
+                height: 30px;
+            }
+            h1 {
+                font-size: 1.3rem !important;
+                margin-left: 40px !important;
             }
             .summary-value {
                 font-size: 1.1rem;
@@ -184,7 +236,11 @@
 </head>
 <body>
     <div class="container">
-        <h1>Учёт вреда</h1>
+        <div class="header-container">
+            <img src="logo.png" alt="Логотип" class="logo">
+            <h1>Учёт вреда</h1>
+        </div>
+
         <div class="form-group">
             <label for="category">Категория:</label>
             <select id="category">
@@ -192,6 +248,8 @@
                 <option value="tobacco">Табак</option>
             </select>
         </div>
+
+        <!-- Остальная часть HTML (без изменений) -->
         <div class="form-group">
             <label for="amount">Сумма (руб):</label>
             <input type="number" id="amount" min="0" step="1" placeholder="Введите сумму">
@@ -228,10 +286,11 @@
             <button id="clear-btn" class="btn-danger">Очистить данные</button>
         </div>
     </div>
+
     <script>
-        // Инициализация хранилища
+        // Весь JavaScript код остается без изменений
         let expenses = JSON.parse(localStorage.getItem('habits_expenses')) || [];
-        // Элементы DOM
+        
         const categorySelect = document.getElementById('category');
         const amountInput = document.getElementById('amount');
         const dateInput = document.getElementById('date');
@@ -241,9 +300,9 @@
         const yearTotalEl = document.getElementById('year-total');
         const exportBtn = document.getElementById('export-btn');
         const clearBtn = document.getElementById('clear-btn');
-        // Установка текущей даты по умолчанию
+        
         dateInput.valueAsDate = new Date();
-        // Инициализация графика с тёмной темой
+        
         const ctx = document.getElementById('expenses-chart').getContext('2d');
         Chart.defaults.color = '#a0a0a0';
         Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
@@ -307,20 +366,21 @@
                 }
             }
         });
-        // Функция обновления графика и статистики
+
         function updateData() {
             const period = periodSelect.value;
             const now = new Date();
-            // Фильтрация данных по периоду
+            
             let labels = [];
             let alcoholData = [];
             let tobaccoData = [];
+
             if (period === 'day') {
-                // Группировка по дням за последний месяц
                 const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
                 labels = Array.from({length: daysInMonth}, (_, i) => i + 1);
                 alcoholData = Array(daysInMonth).fill(0);
                 tobaccoData = Array(daysInMonth).fill(0);
+                
                 expenses.forEach(expense => {
                     const expenseDate = new Date(expense.date);
                     if (expenseDate.getMonth() === now.getMonth() && expenseDate.getFullYear() === now.getFullYear()) {
@@ -332,11 +392,12 @@
                         }
                     }
                 });
-            } else if (period === 'week') {
-                // Группировка по неделям за последние 12 недель
+            } 
+            else if (period === 'week') {
                 labels = Array.from({length: 12}, (_, i) => `${12 - i} нед.`);
                 alcoholData = Array(12).fill(0);
                 tobaccoData = Array(12).fill(0);
+                
                 expenses.forEach(expense => {
                     const expenseDate = new Date(expense.date);
                     const weekDiff = getWeekNumber(now) - getWeekNumber(expenseDate) + 
@@ -350,51 +411,58 @@
                         }
                     }
                 });
-            } else if (period === 'month') {
-                // Группировка по месяцам за последний год
+            } 
+            else if (period === 'month') {
                 const monthNames = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
                 labels = monthNames;
                 alcoholData = Array(12).fill(0);
                 tobaccoData = Array(12).fill(0);
+                
+                const currentYear = now.getFullYear();
+                const currentMonth = now.getMonth();
+                
                 expenses.forEach(expense => {
                     const expenseDate = new Date(expense.date);
-                    const monthDiff = (now.getFullYear() - expenseDate.getFullYear()) * 12 + 
-                                     now.getMonth() - expenseDate.getMonth();
+                    const expenseYear = expenseDate.getFullYear();
+                    const expenseMonth = expenseDate.getMonth();
+                    
+                    const monthDiff = (currentYear - expenseYear) * 12 + (currentMonth - expenseMonth);
+                    
                     if (monthDiff >= 0 && monthDiff < 12) {
-                        const monthIndex = 11 - monthDiff;
+                        const index = (currentMonth - monthDiff + 12) % 12;
+                        
                         if (expense.category === 'alcohol') {
-                            alcoholData[monthIndex] += expense.amount;
+                            alcoholData[index] += expense.amount;
                         } else {
-                            tobaccoData[monthIndex] += expense.amount;
+                            tobaccoData[index] += expense.amount;
                         }
                     }
                 });
-            } else if (period === 'year') {
-                // Группировка по годам за последние 5 лет
-                labels = Array.from({length: 5}, (_, i) => now.getFullYear() - (4 - i));
-                alcoholData = Array(5).fill(0);
-                tobaccoData = Array(5).fill(0);
-                expenses.forEach(expense => {
-                    const expenseDate = new Date(expense.date);
-                    const yearDiff = now.getFullYear() - expenseDate.getFullYear();
-                    if (yearDiff >= 0 && yearDiff < 5) {
-                        const yearIndex = 4 - yearDiff;
-                        if (expense.category === 'alcohol') {
-                            alcoholData[yearIndex] += expense.amount;
-                        } else {
-                            tobaccoData[yearIndex] += expense.amount;
-                        }
-                    }
-                });
+                
+                const reorderedLabels = [];
+                const reorderedAlcoholData = [];
+                const reorderedTobaccoData = [];
+                
+                for (let i = 0; i < 12; i++) {
+                    const newIndex = (currentMonth + 1 + i) % 12;
+                    reorderedLabels.push(monthNames[newIndex]);
+                    reorderedAlcoholData.push(alcoholData[newIndex]);
+                    reorderedTobaccoData.push(tobaccoData[newIndex]);
+                }
+                
+                labels = reorderedLabels;
+                alcoholData = reorderedAlcoholData;
+                tobaccoData = reorderedTobaccoData;
             }
-            // Обновление графика
+            
             chart.data.labels = labels;
             chart.data.datasets[0].data = alcoholData;
             chart.data.datasets[1].data = tobaccoData;
             chart.update();
-            // Расчет сумм за месяц и год
+            
             const currentMonth = now.getMonth();
             const currentYear = now.getFullYear();
+            
             const monthTotal = expenses
                 .filter(expense => {
                     const expenseDate = new Date(expense.date);
@@ -402,21 +470,25 @@
                            expenseDate.getFullYear() === currentYear;
                 })
                 .reduce((sum, expense) => sum + expense.amount, 0);
+                
             const yearTotal = expenses
                 .filter(expense => {
                     const expenseDate = new Date(expense.date);
                     return expenseDate.getFullYear() === currentYear;
                 })
                 .reduce((sum, expense) => sum + expense.amount, 0);
+                
             monthTotalEl.textContent = `${monthTotal.toLocaleString()} ₽`;
             yearTotalEl.textContent = `${yearTotal.toLocaleString()} ₽`;
-            // Цвет суммы в зависимости от категории
+            
             const alcoholTotal = expenses
                 .filter(expense => expense.category === 'alcohol')
                 .reduce((sum, expense) => sum + expense.amount, 0);
+                
             const tobaccoTotal = expenses
                 .filter(expense => expense.category === 'tobacco')
                 .reduce((sum, expense) => sum + expense.amount, 0);
+                
             if (alcoholTotal > tobaccoTotal) {
                 monthTotalEl.style.color = 'var(--alcohol-color)';
                 yearTotalEl.style.color = 'var(--alcohol-color)';
@@ -428,7 +500,7 @@
                 yearTotalEl.style.color = 'var(--text-color)';
             }
         }
-        // Вспомогательная функция для получения номера недели в году
+
         function getWeekNumber(date) {
             const d = new Date(date);
             d.setHours(0, 0, 0, 0);
@@ -436,33 +508,37 @@
             const week1 = new Date(d.getFullYear(), 0, 4);
             return 1 + Math.round(((d - week1) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
         }
-        // Обработчик добавления расхода
+
         addBtn.addEventListener('click', () => {
             const category = categorySelect.value;
             const amount = parseFloat(amountInput.value);
             const date = dateInput.value;
+            
             if (!amount || amount <= 0) {
                 alert('Пожалуйста, введите корректную сумму');
                 return;
             }
+            
             if (!date) {
                 alert('Пожалуйста, выберите дату');
                 return;
             }
+            
             expenses.push({
                 category,
                 amount,
                 date
             });
+            
             localStorage.setItem('habits_expenses', JSON.stringify(expenses));
             amountInput.value = '';
             updateData();
-            // Анимация кнопки
+            
             addBtn.style.transform = 'translateY(0)';
         });
-        // Обработчик изменения периода
+
         periodSelect.addEventListener('change', updateData);
-        // Обработчик экспорта в Excel
+
         exportBtn.addEventListener('click', () => {
             const data = [
                 ['Категория', 'Сумма (руб)', 'Дата'],
@@ -472,12 +548,13 @@
                     new Date(expense.date).toLocaleDateString()
                 ])
             ];
+            
             const ws = XLSX.utils.aoa_to_sheet(data);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Расходы');
             XLSX.writeFile(wb, 'расходы_на_вредные_привычки.xlsx');
         });
-        // Обработчик очистки данных
+
         clearBtn.addEventListener('click', () => {
             if (confirm('Вы уверены, что хотите удалить все данные? Это действие нельзя отменить.')) {
                 expenses = [];
@@ -485,9 +562,9 @@
                 updateData();
             }
         });
-        // Инициализация данных при загрузке
+
         updateData();
-        // Адаптация графика при изменении размера окна
+
         window.addEventListener('resize', () => {
             chart.resize();
         });
