@@ -7,6 +7,7 @@
     <link rel="icon" href="logo.png" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Ruslan+Display&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
@@ -24,9 +25,9 @@
             --border-color: #333;
             --alcohol-color: #81c784;
             --tobacco-color: #ef9a9a;
+            --gambling-color: #ffb74d;
         }
 
-        /* Новые стили для логотипа и шапки */
         .header-container {
             display: flex;
             align-items: center;
@@ -73,10 +74,12 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             position: relative;
             z-index: 10;
+            transition: all 0.5s ease;
         }
 
         .form-group {
             margin-bottom: 15px;
+            transition: all 0.3s ease;
         }
 
         label {
@@ -95,12 +98,13 @@
             font-size: 1rem;
             background-color: var(--card-color);
             color: var(--text-color);
-            transition: border-color 0.3s;
+            transition: border-color 0.3s, transform 0.2s ease;
         }
 
         select:focus, input:focus {
             outline: none;
             border-color: var(--primary-color);
+            transform: scale(1.02);
         }
 
         button {
@@ -112,7 +116,7 @@
             font-weight: 600;
             cursor: pointer;
             margin-top: 10px;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
         }
 
         #add-btn {
@@ -128,6 +132,7 @@
         .chart-container {
             margin-top: 30px;
             height: 300px;
+            transition: all 0.5s ease;
         }
 
         .summary {
@@ -138,11 +143,13 @@
             background-color: rgba(255, 255, 255, 0.05);
             border-radius: 8px;
             gap: 10px;
+            transition: all 0.5s ease;
         }
 
         .summary-item {
             text-align: center;
             flex: 1;
+            transition: all 0.3s ease;
         }
 
         .summary-item div:first-child {
@@ -154,13 +161,13 @@
         .summary-value {
             font-size: 1.3rem;
             font-weight: bold;
-            color: var(--alcohol-color);
         }
 
         .controls {
             display: flex;
             gap: 10px;
             margin-top: 20px;
+            transition: all 0.5s ease;
         }
 
         .controls button {
@@ -174,6 +181,7 @@
 
         .btn-danger:hover {
             background-color: var(--danger-hover);
+            transform: translateY(-2px);
         }
 
         .btn-secondary {
@@ -183,9 +191,22 @@
 
         .btn-secondary:hover {
             background-color: var(--secondary-hover);
+            transform: translateY(-2px);
         }
 
-        /* Адаптация для мобильных устройств */
+        .category-icon {
+            margin-right: 8px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 10px;
@@ -244,12 +265,12 @@
         <div class="form-group">
             <label for="category">Категория:</label>
             <select id="category">
-                <option value="alcohol">Алкоголь</option>
-                <option value="tobacco">Табак</option>
+                <option value="alcohol"><i class="fas fa-wine-bottle category-icon"></i>Алкоголь</option>
+                <option value="tobacco"><i class="fas fa-smoking category-icon"></i>Табак</option>
+                <option value="gambling"><i class="fas fa-dice category-icon"></i>Азартные игры</option>
             </select>
         </div>
 
-        <!-- Остальная часть HTML (без изменений) -->
         <div class="form-group">
             <label for="amount">Сумма (руб):</label>
             <input type="number" id="amount" min="0" step="1" placeholder="Введите сумму">
@@ -263,7 +284,6 @@
             <label for="period">Период отображения:</label>
             <select id="period">
                 <option value="day">По дням</option>
-                <option value="week">По неделям</option>
                 <option value="month">По месяцам</option>
                 <option value="year">По годам</option>
             </select>
@@ -288,7 +308,6 @@
     </div>
 
     <script>
-        // Весь JavaScript код остается без изменений
         let expenses = JSON.parse(localStorage.getItem('habits_expenses')) || [];
         
         const categorySelect = document.getElementById('category');
@@ -322,6 +341,12 @@
                         backgroundColor: '#ef9a9a',
                         data: [],
                         borderRadius: 4
+                    },
+                    {
+                        label: 'Азартные игры',
+                        backgroundColor: '#ffb74d',
+                        data: [],
+                        borderRadius: 4
                     }
                 ]
             },
@@ -331,7 +356,10 @@
                 plugins: {
                     legend: {
                         labels: {
-                            color: '#e0e0e0'
+                            color: '#e0e0e0',
+                            font: {
+                                size: 14
+                            }
                         }
                     }
                 },
@@ -363,9 +391,22 @@
                             color: '#a0a0a0'
                         }
                     }
+                },
+                animation: {
+                    duration: 1000,
+                    easing: 'easeOutQuart'
                 }
             }
         });
+
+        function animateElements() {
+            const elements = document.querySelectorAll('.form-group, .chart-container, .summary, .controls');
+            elements.forEach((el, index) => {
+                setTimeout(() => {
+                    el.classList.add('fade-in');
+                }, index * 100);
+            });
+        }
 
         function updateData() {
             const period = periodSelect.value;
@@ -374,12 +415,14 @@
             let labels = [];
             let alcoholData = [];
             let tobaccoData = [];
+            let gamblingData = [];
 
             if (period === 'day') {
                 const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
                 labels = Array.from({length: daysInMonth}, (_, i) => i + 1);
                 alcoholData = Array(daysInMonth).fill(0);
                 tobaccoData = Array(daysInMonth).fill(0);
+                gamblingData = Array(daysInMonth).fill(0);
                 
                 expenses.forEach(expense => {
                     const expenseDate = new Date(expense.date);
@@ -387,27 +430,10 @@
                         const day = expenseDate.getDate() - 1;
                         if (expense.category === 'alcohol') {
                             alcoholData[day] += expense.amount;
-                        } else {
+                        } else if (expense.category === 'tobacco') {
                             tobaccoData[day] += expense.amount;
-                        }
-                    }
-                });
-            } 
-            else if (period === 'week') {
-                labels = Array.from({length: 12}, (_, i) => `${12 - i} нед.`);
-                alcoholData = Array(12).fill(0);
-                tobaccoData = Array(12).fill(0);
-                
-                expenses.forEach(expense => {
-                    const expenseDate = new Date(expense.date);
-                    const weekDiff = getWeekNumber(now) - getWeekNumber(expenseDate) + 
-                                    (now.getFullYear() - expenseDate.getFullYear()) * 52;
-                    if (weekDiff >= 0 && weekDiff < 12) {
-                        const weekIndex = 11 - weekDiff;
-                        if (expense.category === 'alcohol') {
-                            alcoholData[weekIndex] += expense.amount;
                         } else {
-                            tobaccoData[weekIndex] += expense.amount;
+                            gamblingData[day] += expense.amount;
                         }
                     }
                 });
@@ -417,6 +443,7 @@
                 labels = monthNames;
                 alcoholData = Array(12).fill(0);
                 tobaccoData = Array(12).fill(0);
+                gamblingData = Array(12).fill(0);
                 
                 const currentYear = now.getFullYear();
                 const currentMonth = now.getMonth();
@@ -433,8 +460,10 @@
                         
                         if (expense.category === 'alcohol') {
                             alcoholData[index] += expense.amount;
-                        } else {
+                        } else if (expense.category === 'tobacco') {
                             tobaccoData[index] += expense.amount;
+                        } else {
+                            gamblingData[index] += expense.amount;
                         }
                     }
                 });
@@ -442,22 +471,63 @@
                 const reorderedLabels = [];
                 const reorderedAlcoholData = [];
                 const reorderedTobaccoData = [];
+                const reorderedGamblingData = [];
                 
                 for (let i = 0; i < 12; i++) {
                     const newIndex = (currentMonth + 1 + i) % 12;
                     reorderedLabels.push(monthNames[newIndex]);
                     reorderedAlcoholData.push(alcoholData[newIndex]);
                     reorderedTobaccoData.push(tobaccoData[newIndex]);
+                    reorderedGamblingData.push(gamblingData[newIndex]);
                 }
                 
                 labels = reorderedLabels;
                 alcoholData = reorderedAlcoholData;
                 tobaccoData = reorderedTobaccoData;
+                gamblingData = reorderedGamblingData;
+            }
+            else if (period === 'year') {
+                // Получаем все уникальные годы из данных
+                const yearsSet = new Set();
+                expenses.forEach(expense => {
+                    const year = new Date(expense.date).getFullYear();
+                    yearsSet.add(year);
+                });
+                
+                // Добавляем текущий год, если нет данных
+                if (yearsSet.size === 0) {
+                    yearsSet.add(now.getFullYear());
+                }
+                
+                // Сортируем годы по возрастанию
+                const sortedYears = Array.from(yearsSet).sort((a, b) => a - b);
+                
+                labels = sortedYears;
+                alcoholData = Array(sortedYears.length).fill(0);
+                tobaccoData = Array(sortedYears.length).fill(0);
+                gamblingData = Array(sortedYears.length).fill(0);
+                
+                // Заполняем данные по годам
+                expenses.forEach(expense => {
+                    const expenseYear = new Date(expense.date).getFullYear();
+                    const yearIndex = sortedYears.indexOf(expenseYear);
+                    
+                    if (yearIndex !== -1) {
+                        if (expense.category === 'alcohol') {
+                            alcoholData[yearIndex] += expense.amount;
+                        } else if (expense.category === 'tobacco') {
+                            tobaccoData[yearIndex] += expense.amount;
+                        } else {
+                            gamblingData[yearIndex] += expense.amount;
+                        }
+                    }
+                });
             }
             
             chart.data.labels = labels;
             chart.data.datasets[0].data = alcoholData;
             chart.data.datasets[1].data = tobaccoData;
+            chart.data.datasets[2].data = gamblingData;
             chart.update();
             
             const currentMonth = now.getMonth();
@@ -489,24 +559,23 @@
                 .filter(expense => expense.category === 'tobacco')
                 .reduce((sum, expense) => sum + expense.amount, 0);
                 
-            if (alcoholTotal > tobaccoTotal) {
+            const gamblingTotal = expenses
+                .filter(expense => expense.category === 'gambling')
+                .reduce((sum, expense) => sum + expense.amount, 0);
+                
+            // Определение цвета по максимальной категории
+            const maxCategory = Math.max(alcoholTotal, tobaccoTotal, gamblingTotal);
+            
+            if (alcoholTotal === maxCategory) {
                 monthTotalEl.style.color = 'var(--alcohol-color)';
                 yearTotalEl.style.color = 'var(--alcohol-color)';
-            } else if (tobaccoTotal > alcoholTotal) {
+            } else if (tobaccoTotal === maxCategory) {
                 monthTotalEl.style.color = 'var(--tobacco-color)';
                 yearTotalEl.style.color = 'var(--tobacco-color)';
             } else {
-                monthTotalEl.style.color = 'var(--text-color)';
-                yearTotalEl.style.color = 'var(--text-color)';
+                monthTotalEl.style.color = 'var(--gambling-color)';
+                yearTotalEl.style.color = 'var(--gambling-color)';
             }
-        }
-
-        function getWeekNumber(date) {
-            const d = new Date(date);
-            d.setHours(0, 0, 0, 0);
-            d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7);
-            const week1 = new Date(d.getFullYear(), 0, 4);
-            return 1 + Math.round(((d - week1) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
         }
 
         addBtn.addEventListener('click', () => {
@@ -534,16 +603,25 @@
             amountInput.value = '';
             updateData();
             
+            // Анимация добавления
             addBtn.style.transform = 'translateY(0)';
+            document.querySelector('.chart-container').classList.add('fade-in');
         });
 
-        periodSelect.addEventListener('change', updateData);
+        periodSelect.addEventListener('change', () => {
+            document.querySelector('.chart-container').classList.remove('fade-in');
+            setTimeout(() => {
+                updateData();
+                document.querySelector('.chart-container').classList.add('fade-in');
+            }, 300);
+        });
 
         exportBtn.addEventListener('click', () => {
             const data = [
                 ['Категория', 'Сумма (руб)', 'Дата'],
                 ...expenses.map(expense => [
-                    expense.category === 'alcohol' ? 'Алкоголь' : 'Табак',
+                    expense.category === 'alcohol' ? 'Алкоголь' : 
+                    expense.category === 'tobacco' ? 'Табак' : 'Азартные игры',
                     expense.amount,
                     new Date(expense.date).toLocaleDateString()
                 ])
@@ -553,6 +631,10 @@
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Расходы');
             XLSX.writeFile(wb, 'расходы_на_вредные_привычки.xlsx');
+            
+            // Анимация кнопки
+            exportBtn.classList.add('fade-in');
+            setTimeout(() => exportBtn.classList.remove('fade-in'), 1000);
         });
 
         clearBtn.addEventListener('click', () => {
@@ -560,10 +642,17 @@
                 expenses = [];
                 localStorage.removeItem('habits_expenses');
                 updateData();
+                
+                // Анимация очистки
+                document.querySelector('.container').classList.add('fade-in');
             }
         });
 
-        updateData();
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', () => {
+            animateElements();
+            updateData();
+        });
 
         window.addEventListener('resize', () => {
             chart.resize();
